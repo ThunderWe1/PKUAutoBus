@@ -1,76 +1,123 @@
 # PKUAutoBus
 
-An unofficial Android app for the direct 燕园 ↔ 新燕园 campus buses. Each person signs in to PKU on their own phone. No backend, shared credentials, Google Play Services, or background location permission is required.
+> 北京大学燕园 ↔ 新燕园直达班车预约 Android 客户端（非官方）。
 
-## Screenshots
+[![Platform](https://img.shields.io/badge/platform-Android%208.0%2B-3DDC84?logo=android&logoColor=white)](https://github.com/ThunderWe1/PKUAutoBus)
+[![Kotlin](https://img.shields.io/badge/Kotlin-Android-7F52FF?logo=kotlin&logoColor=white)](https://github.com/ThunderWe1/PKUAutoBus)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Release](https://img.shields.io/badge/release-v1.0.0-9B2335)](https://github.com/ThunderWe1/PKUAutoBus/releases/latest)
 
-<p>
-  <img src="dist/previews/booking-demo.png" width="260" alt="Booking screen">
-  <img src="dist/previews/boarding-demo.png" width="260" alt="Boarding QR screen">
+PKUAutoBus 是一个非官方的 Android 客户端，用于预约北京大学燕园 ↔ 新燕园直达班车。每个人在自己的手机上通过北大官方页面登录，App 只在本机保存会话和加密的预约数据；没有后端、共享账号、Google Play 服务或后台定位权限。
+
+## 特性
+
+- **官方页面登录**：密码只在北大官方 WebView 中输入，App 不收集；Cookie 保留在本机。
+- **校区自动判定**：系统粗略定位在本机匹配海淀 / 昌平边界，位置不会上传；也可以手动切换出发校区。
+- **自动选班**：预约当天最早、仍有名额且可预约的直达班次。
+- **乘车二维码**：预约成功后票卡显示二维码；发车后 10 分钟过期，官网报告已使用 / 已取消 / 已失效时立即失效。
+- **取消预约**：二次确认后释放班次；结果未确认时不会重复提交。
+- **离线可用**：乘车码加密缓存，临时断网仍可见并提示状态，恢复后与官网核对。
+- **轻量原生**：Kotlin + Android View；除官方登录外不套 WebView；无分析 SDK，轮询只在前台运行。
+- **可验证**：19 个 JVM 单元测试和 9 个仪器化测试，使用隔离的假门户，不会真实预约或取消。
+
+## 截图
+
+<p align="center">
+  <img src="docs/screenshots/booking-demo.png" width="32%" alt="预约界面" />
+  <img src="docs/screenshots/boarding-demo.png" width="32%" alt="已预约乘车码" />
+  <img src="docs/screenshots/cancellation-demo.png" width="32%" alt="取消确认" />
 </p>
 
-These screenshots come from the instrumented tests against a fake portal. The QR is a labelled test payload and cannot be used to board.
+> 截图来自仪器化测试的假门户数据；二维码是明确标注的测试 payload，不能用于乘车。
 
-## Use
+## 下载
 
-1. Download the latest APK from the repository's [Releases](../../releases) page, or build it yourself (see [Build](#build)). Install it on Android 8.0 or later. This release uses a new signing key: uninstall any older local build first, which clears its app data. Future releases signed with this key can replace it in place. Android may ask you to allow installation from the app used to open the APK.
-2. Tap **登录** or the account icon and sign in on the official PKU page. The app does not collect your password.
-3. Allow approximate location while using the app. 海淀区 selects 燕园; 昌平区 selects 新燕园. Tap the campus name in **从 xxx 出发** to switch it. If location is unavailable or outside both districts, tap **选择** to choose manually. Reopening from the background restores location selection; an existing ticket stays selected.
-4. Check the origin and time, then tap **预约**. It picks the earliest future, free, reservable direct departure today, without an extra walking-time buffer.
-5. After confirmation, the boarding QR fills the central ticket card. It stays selected when location changes and is restored when reopening the app. It expires at departure plus ten minutes, or earlier if the portal reports it used/cancelled/invalid.
-6. To cancel, tap the **取消预约** button, check the trip in the dialog, then tap **确认取消**. **保留预约** does nothing.
+前往 [Releases](https://github.com/ThunderWe1/PKUAutoBus/releases) 下载最新的 APK（当前为 `PKUAutoBus-1.0.0.apk`）。
 
-The app uses live portal availability without displaying remaining counts. Existing active bookings take priority over the next-bus preview. A compact selector appears if several tickets are available. Refresh, official portal, and open-source licenses are icon buttons along the bottom; long-press an icon for its label. The information icon opens the license text directly. Routine headings and status text are hidden; actionable errors and uncertain results remain visible below the central card.
+- 系统：Android 8.0+（API 26+），target API 36
+- 体积：约 2.2 MB
+- 网络：仅访问北大预约官网与登录页
 
-An unknown result after a network timeout is kept across restarts and reauthentication. Refresh or open the official portal to reconcile it; the app never blindly repeats the booking/cancellation. Logout is unavailable while a result remains uncertain. A cached QR remains visible during a temporary outage with a stale-status notice; its acceptance still depends on the server. The phone is kept awake only while the ticket screen is visible.
+> 如果你装过之前的本地构建：本次 1.0.0 改用新的签名密钥，请先卸载旧版再安装；卸载会清除登录和本地预约缓存。之后用同一密钥发布的版本可直接覆盖升级。
 
-## Build
+> APK 未上架应用商店，首次安装需允许“安装未知来源应用”。
 
-Requirements: JDK 17+, Android SDK Platform 36 and Build Tools 36.0.0. The Gradle wrapper is included. Versions are pinned to the validated toolchain: AGP 9.2.1, Gradle 9.4.1.
+## 使用
 
-On Windows:
+1. 打开 App，点击右上角账户图标或“登录”，在北大官方页面完成登录。
+2. 允许“使用期间”的粗略定位：海淀区选择燕园，昌平区选择新燕园。定位不可用或不在两区时，点“选择”手动切换。
+3. 确认出发校区和发车时间，点“预约”。App 会选择当天最早的可预约直达班次。
+4. 预约成功后，中央票卡显示乘车二维码，乘车时向司机出示。
+5. 需要取消时，点“取消预约”，核对弹窗中的班次后点“确认取消”；“保留预约”不做任何操作。
+
+### 数据与权限
+
+| 内容 | 说明 |
+| --- | --- |
+| 登录 Cookie | 只保存在本机 WebView Cookie 存储；退出登录会清除 |
+| 预约与乘车码 | AES-GCM 加密，密钥由 Android Keystore 保管；排除在系统备份之外 |
+| 位置 | 只在本机做区县匹配，不发送给预约官网或地图服务 |
+| 网络 | 仅访问 `https://wproc.pku.edu.cn` 与登录页 `https://iaaa.pku.edu.cn` |
+
+## 从源码构建
+
+需要 JDK 17+、Android SDK Platform 36、Build Tools 36.0.0。项目固定 AGP 9.2.1 / Gradle 9.4.1，Gradle wrapper 已包含。
+
+Windows：
 
 ```powershell
 .\build-release.ps1
 ```
 
-This creates or reuses the release signing key in `%LOCALAPPDATA%\PKUAutoBus\signing`, outside the repository, runs unit tests and release lint, and refreshes the signed APK, source ZIP, and both SHA-256 checksums in `dist`. Filenames use the version from the built APK. Keep both signing files private and back them up: future upgrades must use the same key. They are not included in the APK or source archive.
+脚本会创建或复用 `%LOCALAPPDATA%\PKUAutoBus\signing` 下的发布密钥，运行单元测试与 release lint，并在 `dist` 生成签名 APK、源码 ZIP 和 SHA-256 校验和。请备份并保密这两个签名文件：后续更新必须使用同一把密钥，它们不会打进 APK 或源码包。
 
-Android's internal `versionCode` stays at 2 so existing installations can be replaced without uninstalling or clearing data.
+macOS / Linux 先配置 `local.properties`，然后：
 
-For an unsigned release on another machine, run `./gradlew assembleRelease` with a valid `local.properties`. Set `PKUAUTOBUS_SIGNING_PROPERTIES` to a private Java properties file containing `storeFile`, `storePassword`, `keyAlias`, and `keyPassword` to sign it.
+```bash
+./gradlew assembleRelease
+```
 
-Developer checks:
+签名可用 `PKUAUTOBUS_SIGNING_PROPERTIES` 指向包含 `storeFile`、`storePassword`、`keyAlias`、`keyPassword` 的 properties 文件。
+
+### 测试
 
 ```powershell
 .\gradlew.bat testDebugUnitTest lintDebug assembleDebug
 .\gradlew.bat connectedDebugAndroidTest
 ```
 
-The instrumented tests use an isolated fake portal and clearly labelled test QR payloads. They never reserve/cancel a real bus. Debug installs use a separate application ID (`app.pkuautobus.debug`).
+仪器化测试使用隔离的假门户和明确标注的测试二维码，不会真实预约或取消；debug 包使用独立包名 `app.pkuautobus.debug`。
 
-## Implementation
+## 项目结构
 
-- `Domain.kt`: offline district matching, departure selection, server-adjusted clock, ticket expiry, and pending-operation reconciliation.
-- `PortalClient.kt` / `PortalHttp.kt`: observed portal requests and strict response parsing. Cookies stay in the app's WebView cookie store; requests only go to `https://wproc.pku.edu.cn`. Redirected API requests require login instead of forwarding credentials.
-- `BusModel.kt`: foreground polling, durable pending writes, duplicate prevention, QR and cancellation lifecycle.
-- `TicketStore.kt`: AES-GCM cache protected by Android Keystore, excluded from backup. Login/account changes clear the cache.
-- `MainActivity.kt` / `PortalActivity.kt`: native ticket/booking UI and official login/portal fallback.
+```text
+app/src/main/java/app/pkuautobus/
+├─ MainActivity.kt      # 票卡、预约界面与二维码渲染
+├─ PortalActivity.kt    # 北大官方登录 / 官网兜底 WebView
+├─ BusModel.kt          # 预约、取消、轮询与待确认状态机
+├─ PortalClient.kt      # 官网接口与严格响应解析
+├─ PortalHttp.kt        # Cookie、请求与服务器时钟
+├─ Domain.kt            # 区县判定、选班、时钟、过期与对账
+└─ TicketStore.kt       # AES-GCM + Android Keystore 缓存
 
-Current direct routes were verified on 2026-10-15: resource 7 (燕园校区→新燕园校区), resource 4 (新燕园校区→燕园校区). The app verifies these names and stops if the portal changes the mapping. Paid, group, verification, notice, or advanced-approval flows require the official portal.
+app/src/main/assets/
+├─ districts.json       # 海淀 / 昌平边界（OSM ODbL）
+├─ LICENSE-APACHE-2.0.txt
+├─ LICENSE-LUCIDE.txt
+└─ THIRD_PARTY_NOTICES.txt
 
-QR usage is polled every two seconds and reservation status every thirty seconds while visible, with error backoff. Polling stops in the background. No booking requests are made on launch, on GPS changes, or on ticket expiry.
+docs/screenshots/       # README 截图
+```
 
-The ten-minute validity rule is user supplied; server-reported invalidation takes priority. Successful booking, driver scanning, physical GPS accuracy, and real cancellation require a final on-phone check. Website APIs are undocumented and may change.
+## 说明与免责声明
 
-## Privacy and attribution
-
-Location is classified on-device and never sent to the reservation portal or a mapping service. Passwords are entered only into PKU's official WebView. The app has no analytics. Session cookies and encrypted ticket/pending-operation data are local; logout clears them. QR payloads and session tokens are not logged. Only share the APK, never signing files or local app data.
-
-District polygons are bundled in `app/src/main/assets/districts.json` from OpenStreetMap relations [5505984 (海淀区)](https://www.openstreetmap.org/relation/5505984) and [2988894 (昌平区)](https://www.openstreetmap.org/relation/2988894), retrieved through Nominatim on 2026-10-15. © OpenStreetMap contributors, [ODbL 1.0](https://www.openstreetmap.org/copyright). Matching runs locally in WGS84, with no reverse-geocoding service. Location fixes up to five minutes old and with reported accuracy up to 5 km are accepted; near district borders the estimate may need correction using the campus toggle. New installs request approximate location only. Existing precise-location grants can still use GPS as a fallback.
-
-The four utility icons use [Lucide](https://lucide.dev/) SVG geometry converted to native Android vectors, under ISC/MIT licenses. QR encoding uses [ZXing Core](https://github.com/zxing/zxing) 3.5.3 (Apache License 2.0). AndroidX and Kotlin runtime components are also Apache License 2.0. Notices and full licenses are bundled in the APK; tap the **ⓘ icon** to read them directly. See `THIRD_PARTY_NOTICES.md`.
+- 本项目与北京大学没有官方关联，预约和乘车须遵守学校规定。
+- 登录、预约、取消依赖学校未公开的官网接口，接口或规则变化可能导致功能不可用；App 会停止并提示改用官网。
+- 实际乘车、司机扫码、定位精度和取消结果需以官网或现场为准；离线缓存的二维码不保证被服务器接受。
+- “发车后 10 分钟有效”是用户设定的规则，官网报告已使用 / 已取消 / 已失效时优先。
+- 校区判断使用 WGS84 边界，接受 5 分钟内、精度 5 公里内的定位；靠近区界时粗略定位可能选错，可用校区切换纠正。
+- 区县边界来自 OpenStreetMap（© OpenStreetMap contributors，[ODbL 1.0](https://www.openstreetmap.org/copyright)）；图标来自 [Lucide](https://lucide.dev/)，二维码编码使用 [ZXing](https://github.com/zxing/zxing)。完整第三方许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ## License
 
-[MIT](LICENSE). Bundled third-party components keep their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE)

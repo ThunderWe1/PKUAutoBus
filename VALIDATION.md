@@ -9,7 +9,7 @@ Release: PKUAutoBus 1.0.0 (`app.pkuautobus`, version code 2), minimum Android 8.
 - After removing the intermediate information dialog, the campus/icon-controls test was rerun and passed. It verifies that the information icon opens the licenses directly and that the old confirmation button is absent.
 - Release APK compiled and signed with the new key; after uninstalling the old package, it installed and launched on the API 37 emulator. `apksigner verify --verbose --print-certs` passed with APK Signature Scheme v2. Certificate SHA-256: `112bf564958c36633fdfc17adde8a9c4bc2cd7b47462a34a45e209f8e184c941`.
 - Release lint completed with zero errors and 14 warnings: tool/dependency update suggestions, target API update suggestion, and Kotlin convenience-extension suggestions. Pinned versions remain unchanged.
-- Booking, boarding QR, cancellation-dialog, and license screenshots were inspected. Current images in `dist/previews` use fake portal data; the boarding QR is clearly labelled and cannot be used to board. The older images at these paths have been replaced with the current UI.
+- Booking, boarding QR, cancellation-dialog, and license screenshots were inspected. Current images in `docs/screenshots` use fake portal data; the boarding QR is clearly labelled and cannot be used to board. The older images at these paths have been replaced with the current UI.
 - On 2026-11-12 the boarding screen was simplified: the passenger and expiry rows were removed, and the cancel action became a button. All 19 unit tests and 9 instrumented tests were rerun and passed, and the boarding/cancellation screenshots were refreshed.
 - Portal routes, read endpoints, and website request formats were inspected using authenticated, read-only access. Test writes go only to the fake portal.
 
@@ -28,6 +28,6 @@ The portal has no documented public API. Its fields, login policy, and rules may
 .\build-release.ps1
 ```
 
-Instrumented tests were run through ADB against the fake portal. Generated reports and release artifacts are not committed; the UI screenshots are committed under `dist/previews`.
+Instrumented tests were run through ADB against the fake portal. Generated reports and release artifacts are not committed; the UI screenshots are committed under `docs/screenshots`.
 
 Signing material is outside the project in `%LOCALAPPDATA%\PKUAutoBus\signing`; it must be kept private for future updates. Release APKs are distributed through GitHub Releases.

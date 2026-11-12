@@ -6,9 +6,7 @@ local.properties
 *.jks
 *.keystore
 signing.properties
-dist/*
-!dist/previews/
-!dist/previews/**
+dist/
 *.hprof
 .DS_Store
 Thumbs.db
