@@ -1,0 +1,19 @@
+<resources>
+    <style name="BaseTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#9B2335</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">#F6F4F1</item>
+        <item name="android:navigationBarColor">#24272E</item>
+        <item name="android:statusBarColor">#F6F4F1</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="AppTheme" parent="BaseTheme" />
+    <style name="UtilityButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:tint">@color/icon_tint</item>
+    </style>
+</resources>

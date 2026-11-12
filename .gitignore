@@ -1,0 +1,14 @@
+.gradle/
+.kotlin/
+.idea/
+**/build/
+local.properties
+*.jks
+*.keystore
+signing.properties
+dist/*
+!dist/previews/
+!dist/previews/**
+*.hprof
+.DS_Store
+Thumbs.db
